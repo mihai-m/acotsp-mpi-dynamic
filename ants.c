@@ -848,7 +848,7 @@ void bwas_pheromone_mutation( void )
 
     /* finally use fast version of matrix mutation */
     mutation_rate = mutation_rate / n * nn_ants;
-    num_mutations = n * mutation_rate / 2;   
+    num_mutations = (long int)(n * mutation_rate / 2);
     /* / 2 because of adjustment for symmetry of pheromone trails */
  
     if ( restart_iteration < 2 )

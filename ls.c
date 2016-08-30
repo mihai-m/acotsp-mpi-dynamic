@@ -119,7 +119,7 @@ void two_opt_first( long int *tour )
     long int p_c1, p_c2;         /* predecessor cities of c1 and c2   */   
     long int pos_c1, pos_c2;     /* positions of cities c1, c2        */
     long int i, j, h, l;
-    long int improvement_flag, help, n_improves = 0, n_exchanges=0;
+    long int improvement_flag, improve_node, help, n_improves = 0, n_exchanges=0;
     long int h1=0, h2=0, h3=0, h4=0;
     long int radius;             /* radius of nn-search */
     long int gain = 0;
@@ -147,6 +147,7 @@ void two_opt_first( long int *tour )
 	    DEBUG ( assert ( c1 < n && c1 >= 0); )
 		if ( dlb_flag && dlb[c1] )
 		    continue;
+	    improve_node = FALSE;
 	    pos_c1 = pos[c1];
 	    s_c1 = tour[pos_c1+1];
 	    radius = instance.distance[c1][s_c1];
@@ -160,6 +161,7 @@ void two_opt_first( long int *tour )
 			instance.distance[s_c1][s_c2] - instance.distance[c2][s_c2];
 		    if ( gain < 0 ) {
 			h1 = c1; h2 = s_c1; h3 = c2; h4 = s_c2; 
+			improve_node = TRUE;
 			goto exchange2opt;
 		    }
 		}
@@ -188,16 +190,14 @@ void two_opt_first( long int *tour )
 			instance.distance[p_c1][p_c2] - instance.distance[p_c2][c2];
 		    if ( gain < 0 ) {
 			h1 = p_c1; h2 = c1; h3 = p_c2; h4 = c2; 
+			improve_node = TRUE;
 			goto exchange2opt;
 		    }
 		}
 		else 
 		    break;
 	    }      
-            /* No exchange */
-            dlb[c1] = TRUE;
-            continue;
-
+	    if (improve_node) {
 	    exchange2opt:
 		n_exchanges++;
 		improvement_flag = TRUE;
@@ -244,6 +244,10 @@ void two_opt_first( long int *tour )
 		    }
 		    tour[n] = tour[0];
 		}
+	    } else {
+		dlb[c1] = TRUE;
+	    }
+
 	}
 	if ( improvement_flag ) {
 	    n_improves++;

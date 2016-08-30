@@ -89,6 +89,7 @@ extern long int found_best;         /* iteration in which best solution is found
 extern long int restart_found_best; /* iteration in which restart-best solution is found */
 
 extern FILE *report, *comp_report, *stat_report;
+extern FILE *myReport;
 
 extern char name_buf[LINE_BUF_LEN];
 extern int  opt;
@@ -139,3 +140,6 @@ void population_statistics ( void );
 double node_branching(double l);
 
 void write_params ( void );
+
+//MPI variables
+int myid, size;

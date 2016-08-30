@@ -75,6 +75,8 @@ extern ant_struct *ant;      /* this (array of) struct will hold the colony */
 extern ant_struct *best_so_far_ant;   /* struct that contains the best-so-far ant */
 extern ant_struct *restart_best_ant;  /* struct that contains the restart-best ant */
 
+extern ant_struct *furnica;
+
 extern double   **pheromone; /* pheromone matrix, one entry for each arc */
 extern double   **total;     /* combination of pheromone times heuristic information */
 

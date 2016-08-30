@@ -101,6 +101,7 @@ long int restart_found_best;/* iteration in which restart-best solution is found
 /* ------------------------------------------------------------------------ */
 
 FILE *report, *comp_report, *stat_report;
+FILE *myReport;
 
 char name_buf[LINE_BUF_LEN];
 int  opt;
@@ -286,7 +287,8 @@ void write_report( void )
       COMMENTS: none
 */
 {
-    printf("best %ld, iteration: %ld, time %.2f\n",best_so_far_ant->tour_length,iteration,elapsed_time( VIRTUAL));
+	if (myid==0)
+		printf("best %ld, iteration: %ld, time %.2f\n",best_so_far_ant->tour_length,iteration,elapsed_time( VIRTUAL));
     if (comp_report) 
         fprintf(comp_report,
                 "best %ld\t iteration %ld\t tours %ld\t time %.3f\n",
@@ -463,7 +465,8 @@ void set_default_parameters(void)
     q_0            = 0.0;
     max_tries      = 10;
     max_tours      = 0;
-    seed           = (long int) time(NULL);
+    seed           = (long int) time(NULL) + myid;  /* + myid  because different processes (tries) must have different seeds */
+	                                                // TODO: seeds should be completely random, not consecutive
     max_time       = 10.0;
     optimal        = 1;
     branch_fac     = 1.00001;
@@ -599,19 +602,22 @@ void exit_try( long int ntry )
   checkTour( best_so_far_ant->tour );
 /*    printTourFile( best_so_far_ant->tour ); */
 
-  printf("\n Best Solution in try %ld is %ld\n",ntry, best_so_far_ant->tour_length);
+  if (myid==0)
+	printf("\n Best Solution in try %ld is %ld\n",ntry, best_so_far_ant->tour_length);
   if (report)
       fprintf(report, "Best: %ld\t Iterations: %6ld\t B-Fac %.5f\t Time %.2f\t Tot.time %.2f\n",
               best_so_far_ant->tour_length, found_best, found_branching,
               time_used, elapsed_time( VIRTUAL ));
-  printf(" Best Solution was found after %ld iterations\n", found_best);
+  if (myid==0)
+    printf(" Best Solution was found after %ld iterations\n", found_best);
 
   best_in_try[ntry] = best_so_far_ant->tour_length;
   best_found_at[ntry] = found_best;
   time_best_found[ntry] = time_used;
   time_total_run[ntry] = elapsed_time( VIRTUAL );
-  printf("\ntry %ld, Best %ld, found at iteration %ld, found at time %f\n",
-         ntry, best_in_try[ntry], best_found_at[ntry], time_best_found[ntry]);
+  if (myid==0)
+    printf("\ntry %ld, Best %ld, found at iteration %ld, found at time %f\n",
+           ntry, best_in_try[ntry], best_found_at[ntry], time_best_found[ntry]);
 
   if (comp_report) fprintf(comp_report,"end try %ld\n\n",ntry);
   if (stat_report) fprintf(stat_report,"end try %ld\n\n",ntry);
@@ -646,11 +652,13 @@ void exit_program( void )
   stddev_best = std_deviation( best_in_try, max_tries, avg_sol_quality);
 
   t_avgbest = meanr( time_best_found, max_tries );
-  printf(" t_avgbest = %f\n", t_avgbest );
+  if (myid==0)
+	printf(" t_avgbest = %f\n", t_avgbest );
   t_stdbest = std_deviationr( time_best_found, max_tries, t_avgbest);
 
   t_avgtotal = meanr( time_total_run, max_tries );
-  printf(" t_avgtotal = %f\n", t_avgtotal );
+  if (myid==0)
+	printf(" t_avgtotal = %f\n", t_avgtotal );
   t_stdtotal = std_deviationr( time_total_run, max_tries, t_avgtotal);
 
   if (report) {
@@ -719,10 +727,10 @@ void init_program( long int argc, char *argv[] )
       sprintf(temp_buffer,"best.%s",instance.name);
       TRACE ( printf("%s\n",temp_buffer); )
           report = fopen(temp_buffer, "w");
-      sprintf(temp_buffer,"cmp.%s",instance.name);
+      sprintf(temp_buffer,"cmp[try_%d].%s",myid,instance.name);
       TRACE ( printf("%s\n",temp_buffer); )
           comp_report = fopen(temp_buffer, "w");
-      sprintf(temp_buffer,"stat.%s",instance.name);
+      sprintf(temp_buffer,"stat[try_%d].%s",myid,instance.name);
       TRACE ( printf("%s\n",temp_buffer); )
           stat_report = fopen(temp_buffer, "w");
   } else {
@@ -730,16 +738,20 @@ void init_program( long int argc, char *argv[] )
       comp_report = NULL;
       stat_report = NULL;
   }
-   
-  printf("calculating distance matrix ..\n\n");
+
+  if (myid==0)
+      printf("calculating distance matrix ..\n\n");
   instance.distance = compute_distances();
-  printf(" .. done\n");
+  if (myid==0)
+      printf(" .. done\n");
   write_params();
   if (comp_report)
       fprintf(comp_report,"begin problem %s\n",name_buf);
-  printf("allocate ants' memory ..\n\n");
+  if (myid==0)
+      printf("allocate ants' memory ..\n\n");
   allocate_ants();
-  printf(" .. done\n");
+  if (myid==0)
+      printf(" .. done\n");
 }
 
 
@@ -953,9 +965,11 @@ void write_params( void )
       OUTPUT:         none
 */
 {
+  if (myid==0) {
     fprintf(stdout, "\nParameter-settings: \n\n");
     fprintf_parameters (stdout);
     fprintf(stdout, "\n");
+  }
 
   if (report) {
       fprintf(report,"\nParameter-settings: \n\n");
@@ -970,14 +984,4 @@ void write_params( void )
       fprintf(comp_report,"\n");
   }
 }
-
-
-
-
-
-
-
-
-
-
 

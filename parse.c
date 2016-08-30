@@ -1005,17 +1005,19 @@ int parse_commandline (int argc, char *argv [])
 	exit(0);
     }
 
-    puts ("\t OPTIONS:");
+	if (myid==0)
+		puts ("\t OPTIONS:");
 
     quiet_flag = options.opt_quiet;
 
     if ( options.opt_time ) {
 	max_time = atof(options.arg_time);
-	fputs ("  -t  --time ", stdout);
-	if (options.arg_time != NULL)
+	if (myid==0)
+		fputs ("  -t  --time ", stdout);
+	if (options.arg_time != NULL) if (myid==0)
 	    printf ("with argument \"%.3f\"\n", max_time);
 	check_out_of_range( max_time, 0.0, 86400., "max_time (seconds)");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: time limit is set to default %g seconds\n", max_time);
     }
 
@@ -1023,31 +1025,34 @@ int parse_commandline (int argc, char *argv [])
 
     if ( options.opt_tries ) {
 	max_tries = atol(options.arg_tries);
-	fputs ("  -r  --tries ", stdout);
-	if (options.arg_tries != NULL)
+	if (myid==0)
+		fputs ("  -r  --tries ", stdout);
+	if (options.arg_tries != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", max_tries);
 	check_out_of_range( max_tries, 1, MAXIMUM_NO_TRIES, "max_tries (tries)");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: number or trials is set to default %ld\n", max_tries);
     }
 
     if ( options.opt_tours ) {
 	max_tours = atol(options.arg_tours);
-	fputs ("  -s  --tours ", stdout);
-	if (options.arg_tries != NULL)
+	if (myid==0)
+		fputs ("  -s  --tours ", stdout);
+	if (options.arg_tries != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", max_tours);
-	check_out_of_range( max_tours, 1, LONG_MAX, "max_tries (tries)");
-    } else {
+	check_out_of_range( max_tours, 1, LONG_MAX, "max_tours (tours)");
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: maximum number tours is set to default %ld\n",
                 max_tours);
     }
 
     if ( options.opt_seed ) {
-        seed = atol(options.arg_seed);
-        fputs ("      --seed ", stdout);
-        if (options.arg_seed != NULL)
+        seed = atol(options.arg_seed) + myid;
+		if (myid==0)
+			fputs ("      --seed ", stdout);
+        if (options.arg_seed != NULL) if (myid==0)
             printf ("with argument \"%ld\"\n", seed);
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: a seed was generated as %ld\n", seed);
     }
 
@@ -1056,10 +1061,11 @@ int parse_commandline (int argc, char *argv [])
     if ( options.opt_optimum )
     {
 	optimal = atol(options.arg_optimum);
- 	fputs ("  -o  --optimum ", stdout);
-	if (options.arg_optimum != NULL)
+	if (myid==0)
+		fputs ("  -o  --optimum ", stdout);
+	if (options.arg_optimum != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", optimal);
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: optimal solution value is set to default %ld\n",
                 optimal);
     }
@@ -1073,8 +1079,9 @@ int parse_commandline (int argc, char *argv [])
             exit (1);
         }
 	strcpy (name_buf, options.arg_tsplibfile);
- 	fputs ("  -i  --tsplibfile ", stdout);
-	if (options.arg_tsplibfile != NULL)
+	if (myid==0)
+		fputs ("  -i  --tsplibfile ", stdout);
+	if (options.arg_tsplibfile != NULL) if (myid==0)
 	    printf ("with argument \"%s\"\n", name_buf );
     }
 
@@ -1090,7 +1097,8 @@ int parse_commandline (int argc, char *argv [])
     if (options.opt_as || as_flag) {
         as_flag = TRUE;
         set_default_as_parameters();
-        fprintf(stdout,"as_flag is set to 1, run Ant System\n");
+		if (myid==0)
+			fprintf(stdout,"as_flag is set to 1, run Ant System\n");
     } 
 
     if (options.opt_eas || eas_flag) {
@@ -1102,46 +1110,55 @@ int parse_commandline (int argc, char *argv [])
     if (options.opt_ras || ras_flag) {
         ras_flag = TRUE;
         set_default_ras_parameters();
-        fprintf(stdout,"ras_flag is set to 1, run rank-based Ant System\n");
+		if (myid==0)
+			fprintf(stdout,"ras_flag is set to 1, run rank-based Ant System\n");
     }
 
     if (options.opt_mmas || mmas_flag) {
         mmas_flag = TRUE;
         set_default_mmas_parameters();
-        fprintf(stdout,"mmas_flag is set to 1, run MAX-MIN Ant System\n");
+		if (myid==0)
+			fprintf(stdout,"mmas_flag is set to 1, run MAX-MIN Ant System\n");
     }
 
     if (options.opt_bwas || bwas_flag) {
         bwas_flag = TRUE;
         set_default_bwas_parameters();
-        fprintf(stdout,"bwas_flag is set to 1, run Best-Worst Ant System\n");
+		if (myid==0)
+			fprintf(stdout,"bwas_flag is set to 1, run Best-Worst Ant System\n");
     }
 
     if ( options.opt_acs || acs_flag ) {
         acs_flag = TRUE;
         set_default_acs_parameters();
-        fprintf(stdout,"acs_flag is set to 1, run Ant Colony System\n");
+		if (myid==0)
+			fprintf(stdout,"acs_flag is set to 1, run Ant Colony System\n");
     }
 
     if ( options.opt_localsearch ) {
         ls_flag = atol(options.arg_localsearch);
-        fputs ("  -l  --localsearch ", stdout);
-        if (options.arg_localsearch != NULL)
+		if (myid==0)
+			fputs ("  -l  --localsearch ", stdout);
+        if (options.arg_localsearch != NULL) if (myid==0)
             printf ("with argument \"%ld\"\n", ls_flag);
         check_out_of_range(ls_flag, 0, 3, "ls_flag");
     } else {
         switch (ls_flag) {
         case 0:
-            fprintf(stdout,"\tNote: local search flag is set to default 0 (disabled)\n");
+			if (myid==0)
+				fprintf(stdout,"\tNote: local search flag is set to default 0 (disabled)\n");
             break;
         case 1:
-            fprintf(stdout,"\tNote: local search flag is set to default 1 (2-opt)\n");
+			if (myid==0)
+				fprintf(stdout,"\tNote: local search flag is set to default 1 (2-opt)\n");
             break;
         case 2:
-            fprintf(stdout,"\tNote: local search flag is set to default 2 (2.5-opt)\n");
+			if (myid==0)
+				fprintf(stdout,"\tNote: local search flag is set to default 2 (2.5-opt)\n");
             break;
         case 3:
-            fprintf(stdout,"\tNote: local search flag is set to default 3 (3-opt)\n");
+			if (myid==0)
+				fprintf(stdout,"\tNote: local search flag is set to default 3 (3-opt)\n");
             break;
         default:
             abort();
@@ -1154,25 +1171,28 @@ int parse_commandline (int argc, char *argv [])
 
     if ( options.opt_ants ) {
 	n_ants = atol(options.arg_ants);
-	fputs ("  -m  --ants ", stdout);
-	if (options.arg_ants != NULL)
+	if (myid==0)
+		fputs ("  -m  --ants ", stdout);
+	if (options.arg_ants != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", n_ants);
 	check_out_of_range( n_ants, 1, MAX_ANTS-1, "n_ants");
     } else {
-        if (n_ants < 0)
+        if (n_ants < 0) { if (myid==0)
             fprintf(stdout,"\tNote: number or ants is set to default n\n");
-        else
+		}
+        else if (myid==0)
             fprintf(stdout,"\tNote: number or ants is set to default %ld\n",
                     n_ants);
     }
 
     if ( options.opt_nnants ) {
 	nn_ants = atol(options.arg_nnants);
-	fputs ("  -g  --nnants ", stdout);
-	if (options.arg_ants != NULL)
+	if (myid==0)
+		fputs ("  -g  --nnants ", stdout);
+	if (options.arg_ants != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", nn_ants);
 	check_out_of_range( nn_ants, 1, 100, "nn_ants");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: number of nearest neighbours in tour construction is set to default %ld\n", nn_ants);
     }
 
@@ -1180,11 +1200,12 @@ int parse_commandline (int argc, char *argv [])
 
     if ( options.opt_alpha ) {
 	alpha = atof(options.arg_alpha);
-	fputs ("  -a  --alpha ", stdout);
-	if (options.arg_alpha != NULL)
+	if (myid==0)
+		fputs ("  -a  --alpha ", stdout);
+	if (options.arg_alpha != NULL) if (myid==0)
 	    printf ("with argument \"%f\"\n", alpha);
 	check_out_of_range( alpha, 0., 100., "alpha");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: alpha is set to default %g\n", alpha);
     }
 
@@ -1192,22 +1213,24 @@ int parse_commandline (int argc, char *argv [])
 
     if ( options.opt_beta ) {
 	beta = atof(options.arg_beta);
-	fputs ("  -b  --beta ", stdout);
-	if (options.arg_beta != NULL)
+	if (myid==0)
+		fputs ("  -b  --beta ", stdout);
+	if (options.arg_beta != NULL) if (myid==0)
 	    printf ("with argument \"%f\"\n", beta);
 	check_out_of_range( beta, 0., 100., "beta");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: beta is set to default %g\n", beta);
     }
 
 
     if ( options.opt_rho ) {
 	rho = atof(options.arg_rho);
-	fputs ("  -e  --rho ", stdout);
-	if (options.arg_rho != NULL)
+	if (myid==0)
+		fputs ("  -e  --rho ", stdout);
+	if (options.arg_rho != NULL) if (myid==0)
 	    printf ("with argument \"%f\"\n", rho);
         check_out_of_range( rho, 0.000001, 1., "rho");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: rho is set to default %g\n", rho);
     }
 
@@ -1215,11 +1238,12 @@ int parse_commandline (int argc, char *argv [])
 
     if ( options.opt_q0 ) {
 	q_0 = atof(options.arg_q0);
-	fputs ("  -q  --q0 ", stdout);
-	if (options.arg_q0 != NULL)
+	if (myid==0)
+		fputs ("  -q  --q0 ", stdout);
+	if (options.arg_q0 != NULL) if (myid==0)
 	    printf ("with argument \"%f\"\n", q_0);
 	check_out_of_range( q_0, 0., 1., "q0");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: q_0 is set to default %g\n", q_0);
     }
 
@@ -1227,14 +1251,15 @@ int parse_commandline (int argc, char *argv [])
 
     if ( options.opt_elitistants ) {
 	elitist_ants = atol(options.arg_elitistants);
-	fputs ("  -m  --ants ", stdout);
-	if (options.arg_elitistants != NULL)
+	if (myid==0)
+		fputs ("  -m  --ants ", stdout);
+	if (options.arg_elitistants != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", elitist_ants);
         check_out_of_range( elitist_ants, 0, LONG_MAX, "elitistants");
     } else {
-        if (elitist_ants <= 0) {
+        if (elitist_ants <= 0) { if (myid==0)
             fprintf(stdout,"\tNote: number of elitist ants is set to default n\n");
-        } else {
+        } else { if (myid==0)
             fprintf(stdout,"\tNote: number of elitist ants is set to default %ld\n", elitist_ants);
         }
     }
@@ -1243,38 +1268,42 @@ int parse_commandline (int argc, char *argv [])
 
     if ( options.opt_rasranks ) {
 	ras_ranks = atol(options.arg_rasranks);
-	fputs ("  -m  --ants ", stdout);
-	if (options.arg_rasranks != NULL)
+	if (myid==0)
+		fputs ("  -m  --ants ", stdout);
+	if (options.arg_rasranks != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", ras_ranks);
         check_out_of_range( ras_ranks, 0, LONG_MAX, "rasranks");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: number of ranks is set to default %ld\n", ras_ranks);
     }
 
 
     if ( options.opt_nnls ) {
 	nn_ls = atol(options.arg_nnls);
-	fputs ("  -k  --nnls ", stdout);
-	if (options.arg_nnls != NULL)
+	if (myid==0)
+		fputs ("  -k  --nnls ", stdout);
+	if (options.arg_nnls != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", nn_ls);
         check_out_of_range( nn_ls, 0, LONG_MAX, "nnls");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: number nearest neighbours in local search is set to default %ld\n", nn_ls);
     }
 
 
     if ( options.opt_dlb ) {
 	dlb_flag = atol(options.arg_dlb);
-	fputs ("  -d  --dlb ", stdout);
-	if (options.arg_dlb != NULL)
+	if (myid==0)
+		fputs ("  -d  --dlb ", stdout);
+	if (options.arg_dlb != NULL) if (myid==0)
 	    printf ("with argument \"%ld\"\n", dlb_flag);
 	check_out_of_range( dlb_flag, 0, 1, "dlb_flag");
-    } else {
+    } else { if (myid==0)
         fprintf(stdout,"\tNote: dlb flag is set to default %d (%s don't look bits)\n", 
                 dlb_flag ? 1 : 0, dlb_flag ? "use" : "not use");
     }
 
-    puts ("Non-option arguments:");
+	if (myid==0)
+		puts ("Non-option arguments:");
 
     while (i < argc) {
 	fprintf (stderr,"  \"%s\"\n", argv [i++]);
@@ -1285,6 +1314,4 @@ int parse_commandline (int argc, char *argv [])
 
     return 0;
 }
-
-
 

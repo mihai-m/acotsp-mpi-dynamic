@@ -1,3 +1,28 @@
+Code used in the paper:
+Parallel ACO with a Ring Neighborhood for Dynamic TSP
+Camelia-M. Pintea, Gloria Cerasela Crisan, Mihai Manea
+Journal of Information Technology Research (JITR), August 2012
+https://arxiv.org/abs/1208.4945
+
+Based on ACOTSP by Thomas Stuetzle & co (README below).
+Modifications related to parallelism (MPICH) and dynamicity (ring neighborhood) made by Mihai Manea.
+
+Compiled under Windows, using Visual Studio.
+
+The code was bumped from v1.02 to v1.03, except for ls.c (see diff between first 2 commits).
+
+Execution examples:
+mpiexec -n 3 aco.exe -i lin318.tsp -v -t 10. -o 42029 -m 50 -b 5 -r 3 --quiet
+mpiexec -n 3 aco.exe -i pr2392.tsp -v -t 200. -o 1 -m 100 -b 5 -e 0.2 -r 3 --quiet
+-n == -r  !!!
+
+
+TODO:
+- translate comments
+- make compatible with GNU/linux (mpicc)
+
+
+######################################################
 
        AAAA    CCCC   OOOO   TTTTTT   SSSSS  PPPPP
       AA  AA  CC     OO  OO    TT    SS      PP  PP
